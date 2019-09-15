@@ -1,0 +1,43 @@
+#wrapper {
+  position: relative;
+  margin: 5rem;
+  padding: 1rem;
+  border: 1px solid #000;
+  height: auto;
+}
+
+#wrapper:focus {
+  border: 1px solid blue;
+}
+
+#wrapper.complete {
+  box-shadow: 0 0 5px green;
+  border: 0;
+}
+
+/** text ids **/
+#input {
+  white-space: pre-wrap;
+}
+
+#reference{
+  white-space: pre-wrap;
+}
+
+/** text classes **/
+
+.show {
+  color: #000;
+}
+
+.hint {
+  color: #999;
+}
+
+.hide {
+  visibility: hidden;
+}
+
+.error {
+  color: red;
+}
