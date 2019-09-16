@@ -1,5 +1,6 @@
 import React from "react";
-import Typeover from "./typeover/Typeover";
+import Typeover from "./typeover/Typeover.js";
+import './index.css'
 
 function App() {
   var errors = 0;
@@ -16,7 +17,7 @@ function App() {
     <div>
       <Typeover
         text={"The quick brown fox jumped over the  lazy dog."}
-        mode="recall"
+        hint={true}
         onError={error}
         onComplete={complete}
       />

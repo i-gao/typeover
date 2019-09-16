@@ -3,8 +3,8 @@ import React, { Component } from "react";
 
 export default class Typeover extends Component {
   /**
-   * @param {string, list[string]} text
-   * @param {mode} string "learn" or "recall" or "show"
+   * @param {string} text
+   * @param {bool} hint if false, does not show base text
    * @param {function} onError, callback function for an error
    * @param {function} onComplete, callback function for complete
    */
@@ -27,6 +27,7 @@ export default class Typeover extends Component {
   async handleKey(e) {
     const currInput = this.state.input;
     var key = e.key; // bc events expire after other async calls
+    e.preventDefault(); // to prevent scrolling
 
     switch (type(e.keyCode)) {
       case "BACK":
@@ -67,25 +68,28 @@ export default class Typeover extends Component {
     if (clear && autocorrect) this.setState({ input: textslice });
   }
 
+  componentWillUpdate() {
+    this.complete =
+      this.state.clear && this.state.input.length >= this.text.length;
+    if (this.complete) this.props.onComplete();
+  }
+
   render() {
     // check whether we're done so that we can disable edits on complete
-    const complete =
-      this.state.clear && this.state.input.length >= this.text.length;
-    if (complete) this.props.onComplete();
     return (
       <div
-        id="wrapper"
+        id="typeover-wrapper"
         tabIndex="0"
-        className={complete ? "complete" : null}
-        onKeyDown={complete ? null : this.handleKey}
+        className={this.complete ? "typeover-complete" : null}
+        onKeyDown={this.complete ? null : this.handleKey}
       >
-        <span id="input" className={this.state.clear ? "show" : "error"}>
+        <span id="typeover-input" className={this.state.clear ? "typeover-show" : "typeover-error"}>
           {this.leadSpaces}
           {this.state.input}
         </span>
         <span
-          id="reference"
-          className={this.props.mode === "learn" ? "hint" : "hide"}
+          id="typeover-reference"
+          className={this.props.hint ? "typeover-hint" : "typeover-hide"}
         >
           {this.text.slice(this.state.input.length)}
         </span>

@@ -3,7 +3,9 @@ import React, { Component } from "react";
 
 export default class Typeover extends Component {
   /**
-   * @param {string, list[string]} text
+   * @param {string} text
+   * @param {function} onError, callback function for an error
+   * @param {function} onComplete, callback function for complete
    */
   constructor(props) {
     super(props);
@@ -58,28 +60,35 @@ export default class Typeover extends Component {
       : this.text.slice(0, this.state.input.length);
 
     let clear = fuzzyMatch(this.state.input, textslice);
+    if (!clear) this.props.onError();
     await this.setState({ clear: clear });
 
     if (clear && autocorrect) this.setState({ input: textslice });
   }
 
+  componentWillUpdate() {
+    this.complete =
+      this.state.clear && this.state.input.length >= this.text.length;
+    if (this.complete) this.props.onComplete();
+  }
+
   render() {
     // check whether we're done so that we can disable edits on complete
-    const complete =
-      this.state.clear && this.state.input.length >= this.text.length;
-
     return (
       <div
-        id="wrapper"
+        id="typeover-wrapper"
         tabIndex="0"
-        className={complete ? "complete" : null}
-        onKeyDown={complete ? null : this.handleKey}
+        className={this.complete ? "typeover-complete" : null}
+        onKeyDown={this.complete ? null : this.handleKey}
       >
-        <span id="input" className={this.state.clear ? "show" : "error"}>
+        <span id="typeover-input" className={this.state.clear ? "typeover-show" : "typeover-error"}>
           {this.leadSpaces}
           {this.state.input}
         </span>
-        <span id="reference" className={"hint"}>
+        <span
+          id="typeover-reference"
+          className="typeover-hint"
+        >
           {this.text.slice(this.state.input.length)}
         </span>
       </div>

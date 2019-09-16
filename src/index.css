@@ -1,4 +1,4 @@
-#wrapper {
+#typeover-wrapper {
   position: relative;
   margin: 5rem;
   padding: 1rem;
@@ -6,38 +6,38 @@
   height: auto;
 }
 
-#wrapper:focus {
+#typeover-wrapper:focus {
   border: 1px solid blue;
 }
 
-#wrapper.complete {
+#typeover-wrapper.typeover-complete {
   box-shadow: 0 0 5px green;
   border: 0;
 }
 
 /** text ids **/
-#input {
+#typeover-input {
   white-space: pre-wrap;
 }
 
-#reference{
+#typeover-reference{
   white-space: pre-wrap;
 }
 
 /** text classes **/
 
-.show {
+.typeover-show {
   color: #000;
 }
 
-.hint {
+.typeover-hint {
   color: #999;
 }
 
-.hide {
+.typeover-hide {
   visibility: hidden;
 }
 
-.error {
+.typeover-error {
   color: red;
 }
