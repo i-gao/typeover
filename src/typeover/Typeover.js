@@ -83,7 +83,10 @@ export default class Typeover extends Component {
         className={this.complete ? "typeover-complete" : null}
         onKeyDown={this.complete ? null : this.handleKey}
       >
-        <span id="typeover-input" className={this.state.clear ? "typeover-show" : "typeover-error"}>
+        <span
+          id="typeover-input"
+          className={this.state.clear ? "typeover-show" : "typeover-error"}
+        >
           {this.leadSpaces}
           {this.state.input}
         </span>
@@ -151,11 +154,32 @@ const countTailSpaces = text => {
 
 /**
  * @param {string} word, reference to fuzzymatch
- * @returns {bool} if words match, stripped of punctuation, whitespace, and case
+ * @returns {bool} if words roughly match, stripped of punctuation, whitespace, and case
  * the same as ref
  */
 const fuzzyMatch = (word, reference) => {
-  const fuzzyWord = word.replace(/[^\w\s]|_/g, "").trim();
-  const fuzzyRef = reference.replace(/[^\w\s]|_/g, "").trim();
-  return fuzzyWord.toUpperCase() === fuzzyRef.toUpperCase();
+  const fuzzyWord = word
+    .replace(/[^\w\s]|_/g, "")
+    .trim()
+    .toUpperCase();
+  const fuzzyRef = reference
+    .replace(/[^\w\s]|_/g, "")
+    .trim()
+    .toUpperCase();
+  return anagrams(fuzzyWord, fuzzyRef);
 };
+
+/**
+ * @param {string} a
+ * @param {string} b
+ * @returns {bool} if words are anagrams of each other (same letters)
+ */
+const anagrams = (a, b) => 
+  a
+    .split("")
+    .sort()
+    .join("") ===
+  b
+    .split("")
+    .sort()
+    .join("");
