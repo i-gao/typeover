@@ -16,7 +16,7 @@ function App() {
   return (
     <div>
       <Typeover
-        text={"The quick brown fox jumped over the  lazy dog."}
+        text={""}
         hint={true}
         onError={error}
         onComplete={complete}

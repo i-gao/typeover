@@ -40,7 +40,7 @@ export default class Typeover extends Component {
         if (!this.state.clear) this.validate();
         break;
       case "SPACE":
-        this.setState({ input: currInput + key });
+        if(this.state.clear) this.setState({ input: currInput + key });
         this.validate(true);
         break;
       case "PRINTABLE":
@@ -66,6 +66,7 @@ export default class Typeover extends Component {
     await this.setState({ clear: clear });
 
     if (clear && autocorrect) this.setState({ input: textslice });
+    //if (!clear && autocorrect) this.setState({ input: oldInput.slice(0, -1) });
   }
 
   componentWillUpdate() {
@@ -83,10 +84,7 @@ export default class Typeover extends Component {
         className={this.complete ? "typeover-complete" : null}
         onKeyDown={this.complete ? null : this.handleKey}
       >
-        <span
-          id="typeover-input"
-          className={this.state.clear ? "typeover-show" : "typeover-error"}
-        >
+        <span id="typeover-input" className={this.state.clear ? "typeover-show" : "typeover-error"}>
           {this.leadSpaces}
           {this.state.input}
         </span>
