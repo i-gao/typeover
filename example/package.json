@@ -6,7 +6,7 @@
     "react-addons-update": "^15.6.3",
     "react-dom": "^16.14.0",
     "react-scripts": "3.1.1",
-    "typeover": "~0.1.0"
+    "typeover": "^0.1.1"
   },
   "scripts": {
     "start": "react-scripts start",

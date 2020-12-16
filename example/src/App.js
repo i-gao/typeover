@@ -16,12 +16,18 @@ function ExampleApp() {
     <>
       <Typeover
         text={"The quick brown fox jumped over the lazy dog."}
+        id="no-hold"
+        className="typeover test"
+        styles={{ "padding": "1rem" }}
         holdOnError={false}
         onError={error}
         onComplete={complete}
       />
       <Typeover
         text={"The quick brown fox jumped over the lazy dog."}
+        id="hold"
+        className="typeover"
+        styles={{ "padding": "1rem" }}
         holdOnError={true}
         onError={error}
         onComplete={complete}

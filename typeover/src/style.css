@@ -1,7 +1,3 @@
-#typeover-wrapper {
-  padding: 1rem;
-}
-
 #typeover-input, #typeover-reference {
   white-space: pre-wrap;
 }

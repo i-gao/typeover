@@ -10,21 +10,28 @@ class Typeover extends Component {
    * @param {boolean} hint if false, does not show base text
    * @param {function} onError callback function for an error
    * @param {function} onComplete callback function for complete
+   * @param {string} id ids
+   * @param {string} className classes
+   * @param {object} styles styles for the #typeover-wrapper div
    */
-  constructor({ text, holdOnError, hint, onError, onComplete }) {
-    super();
+  constructor(props) {
+    super(props);
 
     // process args
-    if (!text || typeof(text) != 'string') {
+    if (!props.text || typeof(props.text) != 'string') {
       throw RangeError("Text must be provided as a string");
     }
-    this.text = text.trim();
-    this.holdOnError = (holdOnError !== undefined) ? holdOnError : false;
-    this.hint = (hint !== undefined) ? hint : true;
-    this.onError = (onError) ? onError : () => {};
-    this.onComplete = (onComplete) ? onComplete : () => {};
+    this.text = props.text.trim();
+    this.holdOnError = (props.holdOnError !== undefined) ? props.holdOnError : false;
+    this.hint = (props.hint !== undefined) ? props.hint : true;
+    this.onError = (props.onError) ? props.onError : () => {};
+    this.onComplete = (props.onComplete) ? props.onComplete : () => {};
+    this.id = (props.id) ? props.id : "";
+    this.className = (props.className) ? props.className : "";
+    this.styles = (props.styles !== undefined) ? props.styles : {};
+    
 
-    this.leadSpaces = text.slice(0, util.countLeadSpaces(text));
+    this.leadSpaces = this.text.slice(0, util.countLeadSpaces(this.text));
     this.state = {
       input: "", // user input so far
       error: false // flag for whether user has made an error
@@ -92,10 +99,11 @@ class Typeover extends Component {
     // check whether we're done so that we can disable edits on complete
     return (
       <div
-        id="typeover-wrapper"
+        id={`typeover-wrapper ${this.id}`}
         tabIndex="0"
-        className={this.complete ? "typeover-complete" : null}
+        className={`${this.className} ${this.complete ? "typeover-complete" : ""}`}
         onKeyDown={this.complete ? null : this.handleKey}
+        style={this.styles}
       >
         <span 
           id="typeover-input"
