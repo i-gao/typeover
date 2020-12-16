@@ -1,0 +1,25 @@
+#typeover-wrapper {
+  padding: 1rem;
+}
+
+#typeover-input, #typeover-reference {
+  white-space: pre-wrap;
+}
+
+/** text classes **/
+
+.typeover-show {
+  color: #000;
+}
+
+.typeover-hint {
+  color: #999;
+}
+
+.typeover-hide {
+  visibility: hidden;
+}
+
+.typeover-error {
+  color: red;
+}

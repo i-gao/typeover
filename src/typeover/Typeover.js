@@ -1,20 +1,33 @@
 /* eslint-disable default-case */
 import React, { Component } from "react";
+import * as util from "./utils"
+import './styles.css'
 
 export default class Typeover extends Component {
   /**
    * @param {string} text
-   * @param {bool} hint if false, does not show base text
-   * @param {function} onError, callback function for an error
-   * @param {function} onComplete, callback function for complete
+   * @param {boolean} holdOnError force user to retype if mistake
+   * @param {boolean} hint if false, does not show base text
+   * @param {function} onError callback function for an error
+   * @param {function} onComplete callback function for complete
    */
-  constructor(props) {
-    super(props);
-    this.text = props.text.trim();
-    this.leadSpaces = props.text.slice(0, countLeadSpaces(props.text));
+  constructor({ text, holdOnError, hint, onError, onComplete }) {
+    super();
+
+    // process args
+    if (!text || typeof(text) != 'string') {
+      throw RangeError("Text must be provided as a string");
+    }
+    this.text = text.trim();
+    this.holdOnError = (holdOnError !== undefined) ? holdOnError : false;
+    this.hint = (hint !== undefined) ? hint : true;
+    this.onError = (onError) ? onError : () => {};
+    this.onComplete = (onComplete) ? onComplete : () => {};
+
+    this.leadSpaces = text.slice(0, util.countLeadSpaces(text));
     this.state = {
       input: "", // user input so far
-      clear: true // is user clear to type (no holds)
+      error: false // flag for whether user has made an error
     };
     this.handleKey = this.handleKey.bind(this);
   }
@@ -29,22 +42,22 @@ export default class Typeover extends Component {
     var key = e.key; // bc events expire after other async calls
     e.preventDefault(); // to prevent scrolling
 
-    switch (type(e.keyCode)) {
+    switch (util.type(e.keyCode)) {
       case "BACK":
         // remove either end printable char or all consecutive whitespace chars
-        let numSpaces = countTailSpaces(currInput);
+        let numSpaces = util.countTailSpaces(currInput);
         await this.setState({
           input: currInput.slice(0, numSpaces > 0 ? -numSpaces : -1)
         });
         // after removed: if on hold, check if we can now lift hold
-        if (!this.state.clear) this.validate();
+        if (this.state.error) this.validate();
         break;
       case "SPACE":
-        if(this.state.clear) this.setState({ input: currInput + key });
+        if (!this.holdOnError || !this.state.error) this.setState({ input: currInput + key });
         this.validate(true);
         break;
       case "PRINTABLE":
-        if (this.state.clear) this.setState({ input: currInput + key });
+        if (!this.holdOnError || !this.state.error) this.setState({ input: currInput + key });
         break;
     }
   }
@@ -52,27 +65,27 @@ export default class Typeover extends Component {
   /**
    * called on space, checks if word is correct
    * autocorrects for: missing punctuation, wrong case, and adds on appropriate newline/space
-   * @param {bool} autocorrect, whether to also autocorrect input to textslice on clear
-   * expects input to have space at end
-   * @output {bool, string} sets state of clear and autocorects input
+   * @param {bool} autocorrect, whether to also autocorrect input to text
+   * @output {bool, string} sets state of error and autocorects input
    */
   async validate(autocorrect = false) {
     let textslice = autocorrect
-      ? roundedString(this.state.input.length - 1, this.text)
+      ? util.roundedString(this.state.input.length - 1, this.text)
       : this.text.slice(0, this.state.input.length);
 
-    let clear = fuzzyMatch(this.state.input, textslice);
-    if (!clear) this.props.onError();
-    await this.setState({ clear: clear });
+    let clear = util.fuzzyMatch(this.state.input, textslice);
+    if (!clear) this.onError();
+    if (this.holdOnError) await this.setState({ error: !clear });
 
-    if (clear && autocorrect) this.setState({ input: textslice });
-    //if (!clear && autocorrect) this.setState({ input: oldInput.slice(0, -1) });
+    if (autocorrect && (!this.holdOnError || clear)) {
+      this.setState({ input: textslice });
+    }
   }
 
   componentWillUpdate() {
     this.complete =
-      this.state.clear && this.state.input.length >= this.text.length;
-    if (this.complete) this.props.onComplete();
+      !this.state.error && this.state.input.length >= this.text.length;
+    if (this.complete) this.onComplete();
   }
 
   render() {
@@ -84,13 +97,16 @@ export default class Typeover extends Component {
         className={this.complete ? "typeover-complete" : null}
         onKeyDown={this.complete ? null : this.handleKey}
       >
-        <span id="typeover-input" className={this.state.clear ? "typeover-show" : "typeover-error"}>
+        <span 
+          id="typeover-input"
+          className={this.state.error ? "typeover-error" : "typeover-show"}
+        >
           {this.leadSpaces}
           {this.state.input}
         </span>
         <span
           id="typeover-reference"
-          className={this.props.hint ? "typeover-hint" : "typeover-hide"}
+          className={this.hint ? "typeover-hint" : "typeover-hide"}
         >
           {this.text.slice(this.state.input.length)}
         </span>
@@ -98,86 +114,3 @@ export default class Typeover extends Component {
     );
   }
 }
-
-/** UTILS **/
-
-/**
- * filters keycodes that can be displayed in an input box
- * @param {int} code, a keycode expected [0, 242]
- * @returns {string}, either "SPACE" "BACK" "PRINTABLE". if not a valid char, returns nothing
- * */
-const type = code => {
-  if (code === 32) return "SPACE";
-  if (code === 8) return "BACK";
-  if (
-    (code > 64 && code < 91) /*alpha*/ ||
-    ((code > 185 && code < 192) || code === 222) /*punc*/
-  )
-    return "PRINTABLE";
-};
-
-/**
- * rounds to the next set of spaces or newlines from a starting length
- * @param {int} initial the index from which to start rounding
- * @param {string} text
- * @returns {string} the start of text rounded up to the  set of whitespace
- */
-const roundedString = (initial, text) => {
-  let firstSpace = text.slice(initial).search(/\n|\s/);
-  let index = initial + firstSpace;
-  return firstSpace === -1
-    ? text
-    : text.slice(0, index + countLeadSpaces(text.slice(index)));
-};
-
-/**
- * @param {string} text
- * @returns {int} number of spaces (or newlines) at start of string. 0, n, -1
- */
-const countLeadSpaces = text => {
-  return text.search(/\S./);
-};
-
-/**
- * @param {string} text
- * @returns {int} number of spaces (or newlines) at end of string. 0, n, -1
- */
-const countTailSpaces = text => {
-  let reverse = text
-    .split("")
-    .reverse()
-    .join("");
-  return countLeadSpaces(reverse);
-};
-
-/**
- * @param {string} word, reference to fuzzymatch
- * @returns {bool} if words roughly match, stripped of punctuation, whitespace, and case
- * the same as ref
- */
-const fuzzyMatch = (word, reference) => {
-  const fuzzyWord = word
-    .replace(/[^\w\s]|_/g, "")
-    .trim()
-    .toUpperCase();
-  const fuzzyRef = reference
-    .replace(/[^\w\s]|_/g, "")
-    .trim()
-    .toUpperCase();
-  return anagrams(fuzzyWord, fuzzyRef);
-};
-
-/**
- * @param {string} a
- * @param {string} b
- * @returns {bool} if words are anagrams of each other (same letters)
- */
-const anagrams = (a, b) => 
-  a
-    .split("")
-    .sort()
-    .join("") ===
-  b
-    .split("")
-    .sort()
-    .join("");
