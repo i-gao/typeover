@@ -24,3 +24,6 @@ NPM: [page](https://www.npmjs.com/package/typeover)
 * {boolean} hint if false, does not show base text, default true
 * {function} onError callback function for an error
 * {function} onComplete callback function for complete
+* {string} id ids
+* {string} className classes
+* {object} styles styles for the #typeover-wrapper div
