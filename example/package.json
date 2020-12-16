@@ -1,12 +1,12 @@
 {
-  "name": "typeover",
-  "version": "0.2.0",
+  "name": "typeover-example-app",
   "private": true,
   "dependencies": {
-    "react": "^16.9.0",
+    "react": "^16.14.0",
     "react-addons-update": "^15.6.3",
-    "react-dom": "^16.9.0",
-    "react-scripts": "3.1.1"
+    "react-dom": "^16.14.0",
+    "react-scripts": "3.1.1",
+    "typeover": "~0.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

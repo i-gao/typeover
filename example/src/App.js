@@ -1,5 +1,5 @@
 import React from "react";
-import Typeover from "./typeover/Typeover.js";
+import Typeover from "typeover";
 
 function ExampleApp() {
   var errors = 0;

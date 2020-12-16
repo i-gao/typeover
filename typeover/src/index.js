@@ -1,9 +1,9 @@
 /* eslint-disable default-case */
 import React, { Component } from "react";
-import * as util from "./utils"
-import './styles.css'
+import * as util from "./utils";
+import "./style.css";
 
-export default class Typeover extends Component {
+class Typeover extends Component {
   /**
    * @param {string} text
    * @param {boolean} holdOnError force user to retype if mistake
@@ -114,3 +114,5 @@ export default class Typeover extends Component {
     );
   }
 }
+
+export default Typeover;
