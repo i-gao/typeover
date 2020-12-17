@@ -20,6 +20,7 @@ export const type = code => {
  * @returns {string} the start of text rounded up to the  set of whitespace
  */
 export const roundedString = (initial, text) => {
+    if (initial === -1) return ""; 
     let firstSpace = text.slice(initial).search(/\n|\s/);
     let index = initial + firstSpace;
     return firstSpace === -1
