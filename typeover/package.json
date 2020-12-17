@@ -1,6 +1,6 @@
 {
   "name": "typeover",
-  "version": "0.1.1",
+  "version": "0.1.8",
   "description": "React input box that verifies user text as they type.",
   "keywords": [
     "textbox",

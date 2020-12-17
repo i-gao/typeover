@@ -3,6 +3,12 @@ import React, { Component } from "react";
 import * as util from "./utils";
 import "./style.css";
 
+const INITIAL_STATE = {
+  input: "", // user input so far
+  error: false, // flag for whether user has made an error
+  complete: false, // when complete, disable further typing
+};
+
 class Typeover extends Component {
   /**
    * @param {string} text
@@ -16,27 +22,41 @@ class Typeover extends Component {
    */
   constructor(props) {
     super(props);
+    this.processProps = this.processProps.bind(this);
+    this.handleKey = this.handleKey.bind(this);
+    this.validate = this.validate.bind(this);
+    this.checkComplete = this.checkComplete.bind(this);
 
-    // process args
-    if (!props.text || typeof(props.text) != 'string') {
+    this.processProps(props);
+    this.state = INITIAL_STATE;
+  }
+
+  /**
+   * process defaults and class variables from props
+   * @param {*} props 
+   */
+  processProps(props) {
+    if (!props.text || typeof (props.text) != 'string') {
       throw RangeError("Text must be provided as a string");
     }
     this.text = props.text.trim();
     this.holdOnError = (props.holdOnError !== undefined) ? props.holdOnError : false;
     this.hint = (props.hint !== undefined) ? props.hint : true;
-    this.onError = (props.onError) ? props.onError : () => {};
-    this.onComplete = (props.onComplete) ? props.onComplete : () => {};
-    this.id = (props.id) ? props.id : "";
-    this.className = (props.className) ? props.className : "";
+    this.onError = (props.onError) ? props.onError : () => { };
+    this.onComplete = (props.onComplete) ? props.onComplete : () => { };
+    this.id = (props.id) ? props.id : "typeover-wrapper";
+    this.className = (props.className) ? props.className + " " : "";
     this.styles = (props.styles !== undefined) ? props.styles : {};
-    
-
     this.leadSpaces = this.text.slice(0, util.countLeadSpaces(this.text));
-    this.state = {
-      input: "", // user input so far
-      error: false // flag for whether user has made an error
-    };
-    this.handleKey = this.handleKey.bind(this);
+  }
+
+  /** if props have changed, reset component as if remounting */
+  componentDidUpdate(prevProps) {
+    if (this.props !== prevProps) {
+      this.processProps(this.props);
+      this.setState(INITIAL_STATE);
+      return;
+    }
   }
 
   /**
@@ -67,6 +87,7 @@ class Typeover extends Component {
         if (!this.holdOnError || !this.state.error) this.setState({ input: currInput + key });
         break;
     }
+    this.checkComplete();
   }
 
   /**
@@ -89,23 +110,31 @@ class Typeover extends Component {
     }
   }
 
-  componentWillUpdate() {
-    this.complete =
-      !this.state.error && this.state.input.length >= this.text.length;
-    if (this.complete) this.onComplete();
+  /**
+   * for all characters, check if we have finished typing the text
+   * if complete, change state, which freezes the textbox
+   * if complete, call onComplete callback
+   */
+  checkComplete() {
+    if (!this.state.error
+      && this.state.input.length >= this.text.length
+      && this.text.length > 0) {
+      this.setState({ complete: true })
+      this.onComplete();
+    }
   }
 
   render() {
-    // check whether we're done so that we can disable edits on complete
+    const { complete } = this.state;
     return (
       <div
-        id={`typeover-wrapper ${this.id}`}
+        id={this.id}
         tabIndex="0"
-        className={`${this.className} ${this.complete ? "typeover-complete" : ""}`}
-        onKeyDown={this.complete ? null : this.handleKey}
+        className={this.className + (complete ? "typeover-complete" : "")}
+        onKeyDown={complete ? null : this.handleKey}
         style={this.styles}
       >
-        <span 
+        <span
           id="typeover-input"
           className={this.state.error ? "typeover-error" : "typeover-show"}
         >
